@@ -11,33 +11,15 @@ namespace AssemblyDemo
     {
         public static void Main()
         {
-            string path = @"C:\Windows\Microsoft.NET\Framework\v4.0.30319\System.dll";
+            Assembly currentAssembly = Assembly.GetExecutingAssembly();
+            Type attrType = typeof(AssemblyDescriptionAttribute);
+            object[] attrs = currentAssembly.GetCustomAttributes(attrType, false);
 
-            // Load a specific Assembly
-            Assembly assembly = Assembly.LoadFile(path);
-            ShowAssemblyInfo(assembly);
-
-            // Get our Assembly
-            Assembly ourAssembly = Assembly.GetExecutingAssembly();
-            ShowAssemblyInfo(ourAssembly);
-
-            Console.Read();
-        }
-
-        static void ShowAssemblyInfo(Assembly assembly)
-        {
-            Console.WriteLine(assembly.FullName);
-            Console.WriteLine("From GAC? {0}", assembly.GlobalAssemblyCache);
-            Console.WriteLine("Path: {0}", assembly.Location);
-            Console.WriteLine("Version: {0}", assembly.ImageRuntimeVersion);
-
-            // Show Modules
-            foreach (Module method in assembly.GetModules())
+            if (attrs.Length > 0)
             {
-                Console.WriteLine(" Mod: {0}", method.Name);
+                AssemblyDescriptionAttribute desc = (AssemblyDescriptionAttribute)attrs[0];
+                Console.WriteLine("Description is: {0}", desc.Description);
             }
-
-            Console.WriteLine();
         }
     }
 }
