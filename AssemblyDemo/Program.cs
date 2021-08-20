@@ -11,28 +11,32 @@ namespace AssemblyDemo
     {
         public static void Main()
         {
-            string path = @"C:\Windows\Microsoft.NET\Framework\v4.0.30319\System.ServiceProcess.dll";
+            string path = @"C:\Windows\Microsoft.NET\Framework\v4.0.30319\System.Web.dll";
 
-            // Using BindingFlags to only get declared and instance members
-            BindingFlags flags = BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.Instance;
+            // Get the Assembly from the file
+            Assembly webAssembly = Assembly.LoadFile(path);
 
-            // Load the Assembly from the path
-            Assembly theAssembly = Assembly.LoadFrom(path);
-            Console.WriteLine(theAssembly.FullName);
-            Type[] types = theAssembly.GetTypes();
+            // Get the type to the HttpUtility class
+            Type utilType = webAssembly.GetType("System.Web.HttpUtility");
 
-            foreach (Type t in types)
-            {
-                Console.WriteLine(" Type: {0}", t.Name);
-                MemberInfo[] members = t.GetMembers(flags);
+            // Get the static HtmlEncode and HtmlDecode methods
+            MethodInfo encode = utilType.GetMethod("HtmlEncode", new Type[] { typeof(string) });
+            MethodInfo decode = utilType.GetMethod("HtmlDecode", new Type[] { typeof(string) });
 
-                foreach (MemberInfo member in members)
-                {
-                    Console.WriteLine(" {0}: {1}", member.MemberType, member.Name);
-                }
-            }
+            // Create a string to be encoded
+            string originalString = "This is Sally & Jack's Anniversary <sic>";
 
-            Console.Read();
+            Console.WriteLine(originalString);
+
+            // encode it and show the encoded value
+            string encoded = (string)encode.Invoke(null, new object[] { originalString });
+
+            Console.WriteLine(encoded);
+
+            // decode it to make sure it comes back right
+            string decoded = (string)decode.Invoke(null, new object[] { encoded });
+
+            Console.WriteLine(decoded);
         }
     }
 }
