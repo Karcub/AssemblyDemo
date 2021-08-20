@@ -11,15 +11,28 @@ namespace AssemblyDemo
     {
         public static void Main()
         {
-            Assembly currentAssembly = Assembly.GetExecutingAssembly();
-            Type attrType = typeof(AssemblyDescriptionAttribute);
-            object[] attrs = currentAssembly.GetCustomAttributes(attrType, false);
+            string path = @"C:\Windows\Microsoft.NET\Framework\v4.0.30319\System.ServiceProcess.dll";
 
-            if (attrs.Length > 0)
+            // Using BindingFlags to only get declared and instance members
+            BindingFlags flags = BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.Instance;
+
+            // Load the Assembly from the path
+            Assembly theAssembly = Assembly.LoadFrom(path);
+            Console.WriteLine(theAssembly.FullName);
+            Type[] types = theAssembly.GetTypes();
+
+            foreach (Type t in types)
             {
-                AssemblyDescriptionAttribute desc = (AssemblyDescriptionAttribute)attrs[0];
-                Console.WriteLine("Description is: {0}", desc.Description);
+                Console.WriteLine(" Type: {0}", t.Name);
+                MemberInfo[] members = t.GetMembers(flags);
+
+                foreach (MemberInfo member in members)
+                {
+                    Console.WriteLine(" {0}: {1}", member.MemberType, member.Name);
+                }
             }
+
+            Console.Read();
         }
     }
 }
