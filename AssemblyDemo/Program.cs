@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Reflection.Emit;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -11,32 +12,33 @@ namespace AssemblyDemo
     {
         public static void Main()
         {
-            string path = @"C:\Windows\Microsoft.NET\Framework\v4.0.30319\System.Web.dll";
+            // Create an Assembly Name
+            AssemblyName theName = new AssemblyName();
+            theName.Name = "DemoAssembly";
+            theName.Version = new Version("1.0.0.0");
 
-            // Get the Assembly from the file
-            Assembly webAssembly = Assembly.LoadFile(path);
+            // Get the AppDomain to put our assembly in
+            AppDomain domain = AppDomain.CurrentDomain;
 
-            // Get the type to the HttpUtility class
-            Type utilType = webAssembly.GetType("System.Web.HttpUtility");
+            // Create the Assembly
+            AssemblyBuilder assemBldr = domain.DefineDynamicAssembly(theName, AssemblyBuilderAccess.ReflectionOnly);
 
-            // Get the static HtmlEncode and HtmlDecode methods
-            MethodInfo encode = utilType.GetMethod("HtmlEncode", new Type[] { typeof(string) });
-            MethodInfo decode = utilType.GetMethod("HtmlDecode", new Type[] { typeof(string) });
+            // Define a module to hold our type
+            ModuleBuilder modBldr = assemBldr.DefineDynamicModule("CodeModule", "DemoAssembly.dll");
 
-            // Create a string to be encoded
-            string originalString = "This is Sally & Jack's Anniversary <sic>";
+            // Create a new type
+            TypeBuilder animalBldr = modBldr.DefineType("Animal", TypeAttributes.Public);
 
-            Console.WriteLine(originalString);
+            // Display the new Type
+            Type animal = animalBldr.CreateType();
+            Console.WriteLine(animal.FullName);
 
-            // encode it and show the encoded value
-            string encoded = (string)encode.Invoke(null, new object[] { originalString });
+            foreach (MemberInfo info in animal.GetMembers())
+            {
+                Console.WriteLine(" Member ({0}): {1}", info.MemberType, info.Name);
+            }
 
-            Console.WriteLine(encoded);
-
-            // decode it to make sure it comes back right
-            string decoded = (string)decode.Invoke(null, new object[] { encoded });
-
-            Console.WriteLine(decoded);
+            Console.Read();
         }
     }
 }
